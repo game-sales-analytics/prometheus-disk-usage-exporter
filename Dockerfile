@@ -1,6 +1,6 @@
 FROM docker.io/library/ubuntu:21.10 AS download
 
-RUN groupadd --gid 1001 users && useradd --create-home --gid 1001 --uid 1001 dl
+RUN groupadd --gid 1001 downloaders && useradd --create-home --gid 1001 --uid 1001 dl
 
 USER dl
 
