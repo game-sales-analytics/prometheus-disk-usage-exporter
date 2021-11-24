@@ -12,7 +12,7 @@ RUN wget https://github.com/dundee/disk_usage_exporter/releases/download/v0.1.0/
 
 RUN tar -xvzf disk_usage_exporter_linux_amd64.tgz
 
-FROM quay.io/prometheus/busybox-linux-amd64:latest
+FROM docker.io/library/ubuntu:21.10
 
 COPY --from=download /home/dl/disk_usage_exporter_linux_amd64 /bin/disk_usage_exporter
 
@@ -20,6 +20,4 @@ EXPOSE 9100
 
 USER nobody
 
-ENV DISK_USAGE_EXPORTER_BIND_ADDRESS=0.0.0.0:9995
-
-ENTRYPOINT  [ "disk_usage_exporter", "--bind-address", ${DISK_USAGE_EXPORTER_BIND_ADDRESS} ]
+ENTRYPOINT  [ "disk_usage_exporter" ]
