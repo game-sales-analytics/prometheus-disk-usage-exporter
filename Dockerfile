@@ -18,6 +18,4 @@ COPY --from=download /home/dl/disk_usage_exporter_linux_amd64 /bin/disk_usage_ex
 
 EXPOSE 9100
 
-USER nobody
-
 ENTRYPOINT  [ "disk_usage_exporter" ]
