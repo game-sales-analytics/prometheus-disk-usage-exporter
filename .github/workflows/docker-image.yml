@@ -1,0 +1,60 @@
+name: Build And Publish Docker Image
+on:
+  schedule:
+    - cron: "23 * * * *"
+  push:
+    branches:
+      - main
+jobs:
+  main:
+    runs-on: ubuntu-20.04
+    concurrency:
+      cancel-in-progress: false
+      group: ${{ format('{0}-{1}', github.event_name, github.ref_name) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Docker Meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            docker.io/xeptore/prometheus-disk-usage-exporter
+          tags: |
+            type=edge,enable=${{ github.event_name == 'push' && github.ref_protected && github.ref_type == 'branch' && github.ref_name == 'main' && github.ref == 'refs/heads/main' }}
+            type=schedule,pattern=nightly,enable=${{ github.event_name == 'schedule' }}
+          labels: |
+            maintainer=xeptore
+            org.opencontainers.image.authors=xeptore
+          flavor: |
+            latest=${{ github.event_name == 'push' && github.ref_protected && github.ref_type == 'branch' && github.ref_name == 'main' && github.ref == 'refs/heads/main' }}
+            prefix=,onlatest=false
+            suffix=,onlatest=false
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build_and_push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          pull: true
+          context: .
+          file: Dockerfile
+          no-cache: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+        timeout-minutes: 10
