@@ -12,7 +12,7 @@ RUN wget https://github.com/dundee/disk_usage_exporter/releases/download/v0.1.0/
 
 RUN tar -xvzf disk_usage_exporter_linux_amd64.tgz
 
-FROM docker.io/library/ubuntu:21.10
+FROM gcr.io/distroless/base-debian11
 
 COPY --from=download /home/dl/disk_usage_exporter_linux_amd64 /bin/disk_usage_exporter
 
